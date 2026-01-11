@@ -1,10 +1,10 @@
 from bookshelf.models import Book
 
 # retrieve a book
-Book.object.get(title="1984")
+Book.objects.get(title="1984")
 
 # retriev all books
-Book.object.all()
+Book.objects.all()
 
 # <!-- expected output -->
 # <!-- <QuerySet [<Book: Book object (1)> -->
