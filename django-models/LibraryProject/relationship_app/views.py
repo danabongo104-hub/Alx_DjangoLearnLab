@@ -10,7 +10,7 @@ def list_books(request):
     return render(request, 'relationship_app/list_books.html', {'books': books})
 
 # class based view to list all libraries
-class LibraryListView(DetailView):
+class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
