@@ -27,6 +27,31 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#Browser security settings
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True # Stops browsers from guessing content type
+
+#enforce that cookies are sent over HTTPS only.
+# Only send CSRF cookies over HTTPS
+CSRF_COOKIE_SECURE = True
+# Only send session cookies over HTTPS
+SESSION_COOKIE_SECURE = True
+
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True
+# Instruct browsers to only use HTTPS for this site for 1 year (31536000 seconds)
+SECURE_HSTS_SECONDS = 31536000
+# Include all subdomains in HSTS policy
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# Allow your site to be preloaded into browser HSTS lists
+SECURE_HSTS_PRELOAD = True
+
+# Tell Django to trust the proxy header for HTTPS
+# Only use this if your app is behind a trusted proxy like Nginx or Heroku
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 # Custom user model
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
