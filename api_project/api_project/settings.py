@@ -27,6 +27,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#DRF
+RESTFRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    
+}
+
 
 # Application definition
 
@@ -34,6 +45,7 @@ INSTALLED_APPS = [
     'api',
     'django.contrib.admin',
     'rest_framework',
+    'rest_framework.authtoken',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
