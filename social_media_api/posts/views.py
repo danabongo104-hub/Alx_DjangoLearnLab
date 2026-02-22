@@ -26,7 +26,8 @@ WHY PageNumberPagination?
     implement infinite scroll or traditional pagination.
 """
 
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
 from .models import Comment, Post
@@ -115,3 +116,38 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+class FeedView(generics.ListAPIView):
+    """
+    GET /api/feed/
+
+    Returns posts from users the authenticated user follows,
+    ordered by most recent first.
+
+    WHY ListAPIView instead of ModelViewSet?
+        The feed is read-only — there's no creating, updating or
+        deleting from the feed endpoint. ListAPIView gives us just
+        the GET list action with pagination built in.
+
+    WHY filter on following in get_queryset()?
+        request.user.following.all() returns all users this user
+        follows. We then filter posts to only those whose author
+        is in that set. If the user follows nobody, the feed is
+        empty — which is correct behaviour.
+
+    WHY order by -created_at?
+        Most recent posts at the top — standard social media feed
+        behaviour (reverse chronological order).
+    """
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = PostPagination
+
+    def get_queryset(self):
+        # Get all users the current user follows
+        followed_users = self.request.user.following.all()
+
+        # Return their posts, newest first
+        return Post.objects.filter(
+            author__in=followed_users
+        ).order_by('-created_at')
