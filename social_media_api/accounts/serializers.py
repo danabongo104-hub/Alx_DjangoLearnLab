@@ -31,7 +31,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # Use the create_user method to ensure the password is hashed
-        user = User.objects.create_user(
+        user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
@@ -39,12 +39,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             profile_picture=validated_data.get('profile_picture', None)
         )
         # Generate a token for the new user
-        Token.objects.get_or_create(user=user)
+        Token.objects.create(user=user)
         return user
     
     def get_token(self, obj):
         # Retrieve the just-created user and return their token
-        token, _ = Token.objects.get_or_create(user=obj)
+        token, _ = Token.objects.get(user=obj)
         return token.key
 
 class LoginSerializer(serializers.Serializer):
