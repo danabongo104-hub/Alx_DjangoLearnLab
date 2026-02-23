@@ -26,7 +26,7 @@ WHY PageNumberPagination?
     implement infinite scroll or traditional pagination.
 """
 
-from rest_framework import filters, viewsets, generics
+from rest_framework import filters, viewsets, generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
@@ -140,14 +140,14 @@ class FeedView(generics.ListAPIView):
         behaviour (reverse chronological order).
     """
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = PostPagination
 
     def get_queryset(self):
         # Get all users the current user follows
-        followed_users = self.request.user.following.all()
+        following_users = self.request.user.following.all()
 
         # Return their posts, newest first
         return Post.objects.filter(
-            author__in=followed_users
+            author__in=following_users
         ).order_by('-created_at')
