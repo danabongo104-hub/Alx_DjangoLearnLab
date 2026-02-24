@@ -16,7 +16,7 @@ class Notification(models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     target = GenericForeignKey('content_type', 'object_id')
 
-    timesamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     # Has the recipient read the notification?
     is_read = models.BooleanField(default=False)
