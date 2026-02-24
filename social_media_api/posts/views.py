@@ -26,7 +26,6 @@ WHY PageNumberPagination?
     implement infinite scroll or traditional pagination.
 """
 
-from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets, generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -170,7 +169,7 @@ class LikeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
 
         # Prevent liking your own post
         if post.author == request.user:
@@ -217,7 +216,7 @@ class UnlikeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
 
         like = Like.objects.filter(user=request.user, post=post)
 
