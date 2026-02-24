@@ -26,9 +26,15 @@ WHY PageNumberPagination?
     implement infinite scroll or traditional pagination.
 """
 
-from rest_framework import filters, viewsets, generics, permissions
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, viewsets, generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
 from .models import Comment, Post
 from .permissions import IsAuthorOrReadOnly
@@ -149,3 +155,83 @@ class FeedView(generics.ListAPIView):
 
         # Return their posts, newest first
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
+    
+
+class LikeView(APIView):
+    """
+    POST /api/posts/<pk>/like/
+
+    WHY get_or_create on Like?
+        Idempotent — if the user already liked the post, we don't
+        create a duplicate (unique_together on the model also
+        enforces this at DB level). We also only send a notification
+        on the FIRST like, not on repeated attempts.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+
+        # Prevent liking your own post
+        if post.author == request.user:
+            return Response(
+                {'error': 'You cannot like your own post.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # get_or_create returns (instance, created)
+        # created=True means this is a new like
+        # created=False means they already liked it
+        like, created = Like.objects.get_or_create(
+            user=request.user,
+            post=post,
+        )
+
+        if not created:
+            return Response(
+                {'error': 'You have already liked this post.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create notification for post author
+        Notification.objects.create(
+            recipient=post.author,
+            actor=request.user,
+            verb='liked your post',
+            content_type=ContentType.objects.get_for_model(post),
+            object_id=post.id,
+        )
+
+        return Response(
+            {'message': f'You liked "{post.title}".'},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class UnlikeView(APIView):
+    """
+    POST /api/posts/<pk>/unlike/
+
+    WHY filter().delete() instead of get().delete()?
+        If the like doesn't exist (user never liked the post),
+        filter().delete() safely does nothing. get() would raise
+        a DoesNotExist exception we'd have to handle.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+
+        like = Like.objects.filter(user=request.user, post=post)
+
+        if not like.exists():
+            return Response(
+                {'error': 'You have not liked this post.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        like.delete()
+        return Response(
+            {'message': f'You unliked "{post.title}".'},
+            status=status.HTTP_200_OK
+        )
