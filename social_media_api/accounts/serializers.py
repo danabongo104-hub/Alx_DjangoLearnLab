@@ -13,7 +13,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     # Convenience field — the token is returned so the client can start
     # making authenticated requests right away without a separate login call
-    token = serializers.CharField(read_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -25,7 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
     
     def validate_email(self, value):
-        if User.objects.filter(email=value).exits():
+        if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with that email alreasy exists. ")
         return value
     
@@ -44,7 +44,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     def get_token(self, obj):
         # Retrieve the just-created user and return their token
-        token, _ = Token.objects.get(user=obj)
+        token = Token.objects.get(user=obj)
         return token.key
 
 class LoginSerializer(serializers.Serializer):

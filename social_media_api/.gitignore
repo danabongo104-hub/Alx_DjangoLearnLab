@@ -1,0 +1,19 @@
+# Environment variables — never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+env/
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# OS files
+.DS_Store

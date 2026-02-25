@@ -22,7 +22,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['-timesamp']  # newest first by default
+        ordering = ['-timestamp']  # newest first by default
 
     def __str__(self):
         return f"Notification for {self.recipient.username}: {self.actor.username} {self.verb}"
