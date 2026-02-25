@@ -130,6 +130,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Production port configuration
+PORT = config('PORT', default='8000')
 # -----------------------------------------------------------------------
 # Production security settings
 # WHY wrapped in if not DEBUG?
