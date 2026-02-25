@@ -181,7 +181,7 @@ class LikeView(APIView):
         # get_or_create returns (instance, created)
         # created=True means this is a new like
         # created=False means they already liked it
-        like, created = Like.objects.get_or_create(user=request.user,post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
             return Response(
